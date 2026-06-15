@@ -1,35 +1,23 @@
 from typing import List, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from datetime import date
 
-
-class CountryBase(BaseModel):
-    code: str
-    name: str
+from database.models import MovieStatusEnum
 
 
-class CountryCreate(CountryBase):
-    pass
-
-
-class CountryRead(CountryBase):
+class CountryRead(BaseModel):
     id: int
+    code: str
+    name: Optional[str] = None
 
     class Config:
         from_attributes = True
 
 
-class GALBase(BaseModel):
-    name: str
-
-
-class GALCreate(GALBase):
-    pass
-
-
-class GALRead(GALBase):
+class GALRead(BaseModel):
     id: int
+    name: str
 
     class Config:
         from_attributes = True
@@ -38,11 +26,11 @@ class GALRead(GALBase):
 class MovieBase(BaseModel):
     name: str
     date: date
-    score: float
+    score: float = Field(gt=0, lt=100)
     overview: str
-    status: str
-    budget: float
-    revenue: float
+    status: MovieStatusEnum
+    budget: float = Field(ge=0)
+    revenue: float = Field(ge=0)
 
 
 class MovieCreate(MovieBase):
@@ -52,11 +40,17 @@ class MovieCreate(MovieBase):
     languages: List[str]
 
 
-class MovieUpdate(MovieBase):
-    pass
+class MovieUpdate(BaseModel):
+    name: Optional[str] = None
+    date: Optional[date] = None
+    score: Optional[float] = None
+    overview: Optional[str] = None
+    status: Optional[MovieStatusEnum] = None
+    budget: Optional[float] = None
+    revenue: Optional[float] = None
 
 
-class MovieDetailRead(MovieBase):
+class MovieDetailSchema(MovieBase):
     id: int
     country: CountryRead
     genres: List[GALRead]
@@ -66,9 +60,16 @@ class MovieDetailRead(MovieBase):
     class Config:
         from_attributes = True
 
+class MovieListItemSchema(BaseModel):
+    id: int
+    name: str
+    date: date
+    score: float
+    overview: str | None
 
-class MovieListRead(BaseModel):
-    movies: List[MovieDetailRead]
+
+class MovieListResponseSchema(BaseModel):
+    movies: List[MovieListItemSchema]
     prev_page: Optional[str] = None
     next_page: Optional[str] = None
     total_pages: int
