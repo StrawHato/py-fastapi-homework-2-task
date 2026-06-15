@@ -14,12 +14,17 @@ from sqlalchemy.orm import selectinload
 import service
 from database import get_db, MovieModel
 
-from src import schemas
+from schemas import (
+    MovieListResponseSchema,
+    MovieDetailSchema,
+    MovieCreate,
+    MovieUpdate
+)
 
 router = APIRouter()
 
 
-@router.get("/movies/", response_model=schemas.MovieListResponseSchema)
+@router.get("/movies/", response_model=MovieListResponseSchema)
 async def get_movies(
         page: int = Query(default=1, ge=1),
         per_page: int = Query(default=10, ge=1, le=20),
@@ -66,9 +71,9 @@ async def get_movies(
     }
 
 
-@router.post("/movies/", response_model=schemas.MovieDetailSchema, status_code=201)
+@router.post("/movies/", response_model=MovieDetailSchema, status_code=201)
 async def create_movie(
-        movie: schemas.MovieCreate,
+        movie: MovieCreate,
         db: AsyncSession = Depends(get_db)
 ):
     db_movie = await service.check_for_movie_in_database(movie=movie, db=db)
@@ -145,7 +150,7 @@ async def create_movie(
     return db_movie
 
 
-@router.get("/movies/{movie_id}/", response_model=schemas.MovieDetailSchema)
+@router.get("/movies/{movie_id}/", response_model=MovieDetailSchema)
 async def get_movie(
         movie_id: int,
         db: AsyncSession = Depends(get_db)
@@ -188,9 +193,13 @@ async def delete_movie(movie_id: int, db: AsyncSession = Depends(get_db)):
 @router.patch("/movies/{movie_id}/")
 async def update_movie(
         movie_id: int,
-        movie: schemas.MovieUpdate,
+        movie: MovieUpdate,
         db: AsyncSession = Depends(get_db),
 ):
+    if movie.date:
+        await service.check_for_date(movie.date)
+    if movie.name:
+        await service.check_for_name_len(movie.name)
     db_movie = await db.scalar(select(MovieModel).where(MovieModel.id == movie_id))
     if not db_movie:
         raise HTTPException(

@@ -111,9 +111,9 @@ async def create_country(code: str, db: AsyncSession = Depends(get_db)):
 
 async def check_for_date(movie_date: date):
     if movie_date > date.today() + timedelta(days=365):
-        raise HTTPException(status_code=400, detail="Invalid data")
+        raise HTTPException(status_code=400, detail="Invalid input data.")
 
 
 async def check_for_name_len(name: str):
     if len(name) > 255:
-        raise HTTPException(status_code=400, detail="Invalid data")
+        raise HTTPException(status_code=400, detail="Invalid input data.")
