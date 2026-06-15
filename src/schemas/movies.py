@@ -26,7 +26,7 @@ class GALRead(BaseModel):
 class MovieBase(BaseModel):
     name: str
     date: date
-    score: float = Field(gt=0, lt=100)
+    score: float = Field(ge=0, le=100)
     overview: str
     status: MovieStatusEnum
     budget: float = Field(ge=0)
@@ -43,11 +43,11 @@ class MovieCreate(MovieBase):
 class MovieUpdate(BaseModel):
     name: Optional[str] = None
     date: Optional[date] = None
-    score: Optional[float] = None
+    score: Optional[float] = Field(None, ge=0, le=100)
     overview: Optional[str] = None
     status: Optional[MovieStatusEnum] = None
-    budget: Optional[float] = None
-    revenue: Optional[float] = None
+    budget: Optional[float] = Field(None, ge=0)
+    revenue: Optional[float] = Field(None, ge=0)
 
 
 class MovieDetailSchema(MovieBase):
@@ -59,6 +59,7 @@ class MovieDetailSchema(MovieBase):
 
     class Config:
         from_attributes = True
+
 
 class MovieListItemSchema(BaseModel):
     id: int

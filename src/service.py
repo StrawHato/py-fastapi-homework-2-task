@@ -8,6 +8,8 @@ from database import get_db, MovieModel
 
 from datetime import date, timedelta
 
+from schemas import MovieCreate
+
 
 async def check_for_actor_in_database(
         actor: str,
@@ -58,7 +60,7 @@ async def check_for_country_in_database(
 
 
 async def check_for_movie_in_database(
-        movie: MovieModel,
+        movie: MovieCreate,
         db: AsyncSession = Depends(get_db)
 ):
     db_movie = await db.scalar(
